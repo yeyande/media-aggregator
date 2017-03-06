@@ -57,8 +57,7 @@ func draw_main() {
     }
     draw_queue_window(Window{20, height, 0, 3})
     draw_connectors(width-1, height-1)
-	printf_tb(4, 1, termbox.ColorMagenta|termbox.AttrBold, termbox.ColorDefault, "Media Player")
-    printf_tb(21, 1, termbox.ColorWhite, termbox.ColorDefault, "foo")
+	printf_tb(4, 1, termbox.ColorWhite|termbox.AttrBold, termbox.ColorDefault, "Media Player")
 	termbox.Flush()
 }
 
