@@ -8,6 +8,9 @@ import (
 func main() {
     app.Init()
 	defer termbox.Close()
+    app.AddMenuItem("Local")
+    app.AddMenuItem("Google Music")
+    app.AddMenuItem("Pandora")
 	app.Draw()
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
@@ -32,9 +35,9 @@ func handleKeypress(ev termbox.Event) {
     default:
         break
     }
-    app.PrintKey(ev.Key)
+    app.PrintKey(ev.Ch)
     //dispatch_press(&ev)
-    termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+    //termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
     app.Draw()
     termbox.Flush()
 }

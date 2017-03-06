@@ -5,17 +5,12 @@ import (
     "github.com/nsf/termbox-go"
 )
 
-func Draw() {
-    width, height := termbox.Size()
-    drawBorders(Window{width-1, height-1, 0, 0})
-    for i := 1; i <= width; i++ {
-        drawChar(i, 2, BoxHoriz)
-    }
-    drawMenuBar(width)
-    drawQueueWindow(Window{20, height, 0, 3})
-    drawConnectors(width-1, height-1)
-	termbox.Flush()
+type MenuItem struct {
+    start int
+    name string
+    selected bool
 }
+
 type Window struct {
     width int
     height int
@@ -23,36 +18,65 @@ type Window struct {
     offsety int
 }
 
+func AddMenuItem(name string) {
+    item := MenuItem{getMenuItemOffset(), name, false}
+    if len(menuItems) == 0 {
+        item.selected = true
+    }
+    menuItems = append(menuItems, item)
+}
+
+func getMenuItemOffset() int {
+    offset := 22
+    for _, item := range menuItems {
+        offset += 3 + len(item.name)
+    }
+    return offset
+}
+
+func Init() {
+	err := termbox.Init()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func Draw() {
+    width, height := termbox.Size()
+    drawBorders(Window{width-1, height-1, 0, 0})
+    for i := 1; i <= width; i++ {
+        drawChar(i, 2, boxHoriz)
+    }
+    drawMenuBar(width)
+    drawQueueWindow(Window{20, height, 0, 3})
+    drawConnectors(width-1, height-1)
+	termbox.Flush()
+}
+
+func PrintKey(key rune) {
+	printfTb(3, 19, termbox.ColorWhite, termbox.ColorDefault, "Key: %c", key)
+}
+
 const (
-    BoxHoriz = 0x2500
-    BoxVert = 0x2502
-    BoxHorizUp = 0x2534
-    BoxVertRight = 0x251C
-    BoxVertLeft = 0x2524
-    BoxDownHoriz = 0x252C
-    BoxDownRight = 0x250C
-    BoxDownLeft = 0x2510
-    BoxUpRight = 0x2514
-    BoxUpLeft = 0x2518
+    boxHoriz = 0x2500
+    boxVert = 0x2502
+    boxHorizUp = 0x2534
+    boxVertRight = 0x251C
+    boxVertLeft = 0x2524
+    boxDownHoriz = 0x252C
+    boxDownRight = 0x250C
+    boxDownLeft = 0x2510
+    boxUpRight = 0x2514
+    boxUpLeft = 0x2518
 )
 
-type MenuItem struct {
-    start int
-    name string
-    selected bool
-}
-
-var menuItems = []MenuItem{
-    {22, "Local", true},
-    {30, "Google Music", false},
-    {45, "Pandora", false},
-}
+var menuItems = []MenuItem{}
 
 func drawMenuBar(width int) {
 	printfTb(4, 1, termbox.ColorWhite|termbox.AttrBold, termbox.ColorDefault, "Media Player")
     for _, item := range menuItems {
         printMenuItem(item)
-        drawChar(item.start+len(item.name)+1, 1, BoxVert)
+        drawChar(item.start+len(item.name)+1, 1, boxVert)
     }
 }
 
@@ -69,15 +93,15 @@ func printMenuItem(item MenuItem) {
 }
 
 func drawConnectors(width, height int) {
-    drawChar(20, 1, BoxVert)
-    drawChar(20, 0, BoxDownHoriz)
-    drawChar(20, height, BoxHorizUp)
-    drawChar(0, 2, BoxVertRight)
-    drawChar(width, 2, BoxVertLeft)
-    drawChar(0, 0, BoxDownRight)
-    drawChar(width, 0, BoxDownLeft)
-    drawChar(0, height, BoxUpRight)
-    drawChar(width, height, BoxUpLeft)
+    drawChar(20, 1, boxVert)
+    drawChar(20, 0, boxDownHoriz)
+    drawChar(20, height, boxHorizUp)
+    drawChar(0, 2, boxVertRight)
+    drawChar(width, 2, boxVertLeft)
+    drawChar(0, 0, boxDownRight)
+    drawChar(width, 0, boxDownLeft)
+    drawChar(0, height, boxUpRight)
+    drawChar(width, height, boxUpLeft)
 }
 
 func drawChar(x int, y int, ch rune) {
@@ -86,42 +110,25 @@ func drawChar(x int, y int, ch rune) {
 
 func drawBorders(w Window) {
 	for i := 1; i <= w.width; i++ {
-        drawChar(i, 0, BoxHoriz)
-        drawChar(i, w.height, BoxHoriz)
+        drawChar(i, 0, boxHoriz)
+        drawChar(i, w.height, boxHoriz)
 	}
 	for i := 1; i < w.height; i++ {
-        drawChar(0, i, BoxVert)
-        drawChar(w.width, i, BoxVert)
+        drawChar(0, i, boxVert)
+        drawChar(w.width, i, boxVert)
 	}
 }
 
 func drawQueueWindow(w Window) {
     for i := w.offsety; i < w.height; i++ {
-        drawChar(w.width, i, BoxVert)
+        drawChar(w.width, i, boxVert)
     }
     termbox.SetCell(w.width, 2, 0x253C, termbox.ColorWhite, termbox.ColorDefault)
 }
 
-func PrintKey(key termbox.Key) {
-	printfTb(3, 19, termbox.ColorWhite, termbox.ColorDefault, "Key: ")
-	printfTb(8, 19, termbox.ColorYellow, termbox.ColorDefault, "decimal: %d", key)
-}
-
-func printTb(x, y int, fg, bg termbox.Attribute, msg string) {
-	for _, c := range msg {
+func printfTb(x, y int, fg, bg termbox.Attribute, format string, args ...interface{}) {
+    for _, c := range fmt.Sprintf(format, args...) {
 		termbox.SetCell(x, y, c, fg, bg)
 		x++
-	}
-}
-
-func printfTb(x, y int, fg, bg termbox.Attribute, format string, args ...interface{}) {
-	s := fmt.Sprintf(format, args...)
-	printTb(x, y, fg, bg, s)
-}
-
-func Init() {
-	err := termbox.Init()
-	if err != nil {
-		panic(err)
-	}
+    }
 }
