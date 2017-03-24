@@ -1,38 +1,36 @@
 package app
 
 import (
-    "github.com/nsf/termbox-go"
+    "log"
+
+	"github.com/jroimartin/gocui"
 )
 
-type Window struct {
-    width int
-    height int
-    offsetx int
-    offsety int
+type MenuWidget struct { Widget }
+
+type PlaylistWidget struct { Widget }
+
+func (w *PlaylistWidget) Layout(g *gocui.Gui) error {
+    _, h := g.Size()
+    w.h = h-w.y-1
+    return w.render(g)
 }
 
-func Init() {
-	err := termbox.Init()
-	if err != nil {
-		panic(err)
+func setBinding(g *gocui.Gui, view string, key interface{},
+                mod gocui.Modifier, cb func(g *gocui.Gui, v *gocui.View) error) {
+	if err := g.SetKeybinding(view, key, mod, cb); err != nil {
+		log.Panicln(err)
 	}
 }
 
-func Draw() {
-    width, height := termbox.Size()
-    drawBorders(Window{width-1, height-1, 0, 0})
-    for i := 1; i <= width; i++ {
-        drawChar(i, 2, boxHoriz)
-    }
-    drawMenuBar(width)
-    drawQueueWindow(Window{20, height, 0, 3})
-    drawConnectors(width-1, height-1)
-	termbox.Flush()
+func NewMenuWidget(name, body string) *MenuWidget {
+    return &MenuWidget{Widget{name, 0, 0, len(body)+1, 0, body, false}}
 }
 
-func drawQueueWindow(w Window) {
-    for i := w.offsety; i < w.height; i++ {
-        drawChar(w.width, i, boxVert)
-    }
-    termbox.SetCell(w.width, 2, 0x253C, termbox.ColorWhite, termbox.ColorDefault)
+func NewPlaylistWidget(x, y, h int) *PlaylistWidget {
+    return &PlaylistWidget{Widget{"playlist", x, y, 20, h-y-1, "", false}}
+}
+
+func quit(g *gocui.Gui, v *gocui.View) error {
+	return gocui.ErrQuit
 }

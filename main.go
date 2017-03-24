@@ -1,44 +1,48 @@
 package main
 
 import (
-    "github.com/yeyande/media-aggregator/app"
-    "github.com/nsf/termbox-go"
+	"log"
+
+	"github.com/jroimartin/gocui"
+	"github.com/yeyande/media-aggregator/app"
 )
 
+const delta = 0.2
+
 func main() {
-    app.Init()
-	defer termbox.Close()
-    app.AddMenuItem("Local")
-    app.AddMenuItem("Google Music")
-    app.AddMenuItem("Pandora")
-	app.Draw()
-	for {
-		switch ev := termbox.PollEvent(); ev.Type {
-		case termbox.EventKey:
-            handleKeypress(ev)
-		case termbox.EventResize:
-			termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-			app.Draw()
-		case termbox.EventError:
-			panic(ev.Err)
-		}
+	g, err := gocui.NewGui(gocui.OutputNormal)
+	if err != nil {
+		log.Panicln(err)
+	}
+	defer g.Close()
+
+    _, h := g.Size()
+    title := app.NewTitleWidget(g, "title", 0, 0, "Media Player")
+    title.AddMenuWidget(app.NewMenuWidget("gplay", "Google Music"))
+    title.AddMenuWidget(app.NewMenuWidget("pandora", "Pandora"))
+    title.AddMenuWidget(app.NewMenuWidget("local", "Local"))
+    playlist := app.NewPlaylistWidget(0, 3, h)
+    g.SetManager(title, playlist)
+
+    setKeybinds(g)
+
+	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
+		log.Panicln(err)
 	}
 }
 
-func handleKeypress(ev termbox.Event) {
-    switch ev.Ch {
-    case 'q':
-        panic("exiting")
-        break
-    case 'l':
-        break
-    default:
-        break
-    }
-    app.PrintKey(ev.Ch)
-    //dispatch_press(&ev)
-    //termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-    app.Draw()
-    termbox.Flush()
+func quit(g *gocui.Gui, v *gocui.View) error {
+	return gocui.ErrQuit
 }
 
+func setKeybinds(g *gocui.Gui) {
+	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
+		log.Panicln(err)
+	}
+}
+
+
+const helpText = `KEYBINDINGS
+Tab: Move between buttons
+Enter: Push button
+^C: Exit`
