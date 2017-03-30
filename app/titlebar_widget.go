@@ -32,12 +32,21 @@ func (w *titlebarWidget) Layout(g *gocui.Gui) error {
 
 func (w *titlebarWidget) setBindings(g ConsoleInterface) {
     setBinding(g, w.name, 'h', gocui.ModNone, w.selectLeft)
+    setBinding(g, w.name, 'l', gocui.ModNone, w.selectRight)
     setBinding(g, w.name, 'q', gocui.ModNone, quit)
 }
 
 func (w *titlebarWidget) selectLeft(g *gocui.Gui, v *gocui.View) error {
+    return w.changeMenuEntry(g, -1)
+}
+
+func (w *titlebarWidget) selectRight(g *gocui.Gui, v *gocui.View) error {
+    return w.changeMenuEntry(g, 1)
+}
+
+func (w *titlebarWidget) changeMenuEntry(g *gocui.Gui, dir int) error {
     w.deselectEntry(g)
-    w.shiftSelectedEntry(-1)
+    w.shiftSelectedEntry(dir)
     w.selectEntry(g)
 	return nil
 }
