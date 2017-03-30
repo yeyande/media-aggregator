@@ -16,7 +16,7 @@ func (w *PlaylistWidget) Layout(g *gocui.Gui) error {
     return w.render(g)
 }
 
-func setBinding(g *gocui.Gui, view string, key interface{},
+func setBinding(g ConsoleInterface, view string, key interface{},
                 mod gocui.Modifier, cb func(g *gocui.Gui, v *gocui.View) error) {
 	if err := g.SetKeybinding(view, key, mod, cb); err != nil {
 		log.Panicln(err)

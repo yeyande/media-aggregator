@@ -67,7 +67,39 @@ func (g *mockGui) View(name string) (*gocui.View, error) {
     return &gocui.View{}, nil
 }
 
-func TestSelectLeft(t *testing.T) {
+func TestShiftSelectedEntry(t *testing.T) {
+    w := Widget{"", 0, 0, 0, 0, "", false}
+    menuWidget := *createMenuWidget("", 0, 0, 0, 0, "")
+    cases := []struct {
+        title titlebarWidget
+        in int
+        want int
+    }{
+        /*
+        Test Cases:
+        Incrementing a list at the end
+        Decrementing a list at the end
+        */
+        {titlebarWidget{w, 0, []MenuWidget{}}, 1, 0},
+        {titlebarWidget{w, 0, []MenuWidget{}}, -1, 0},
+        {titlebarWidget{w, 0, []MenuWidget{menuWidget}}, 1, 0},
+        {titlebarWidget{w, 0, []MenuWidget{menuWidget}}, -1, 0},
+        {titlebarWidget{w, 0, []MenuWidget{menuWidget, menuWidget}}, 1, 1},
+        {titlebarWidget{w, 0, []MenuWidget{menuWidget, menuWidget}}, -1, 1},
+        {titlebarWidget{w, 1, []MenuWidget{menuWidget, menuWidget}}, 1, 0},
+        {titlebarWidget{w, 1, []MenuWidget{menuWidget, menuWidget}}, -1, 0},
+        {titlebarWidget{w, 1, []MenuWidget{menuWidget, menuWidget, menuWidget}}, 1, 2},
+        {titlebarWidget{w, 1, []MenuWidget{menuWidget, menuWidget, menuWidget}}, -1, 0},
+    }
+    for _, c := range cases {
+        c.title.shiftSelectedEntry(c.in)
+        got := c.title.selectedEntry
+        if c.want != got {
+            t.Errorf("TitlebarWidget.shiftSelectedEntry(%d) with %d entries should cause title.selectedEntry = %d, got %d",
+                    c.in, len(c.title.menuEntries), c.want, got)
+        }
+    }
+    /*
     title := titlebarWidget{
         Widget{"title", 0, 0, 20, 2, "title", false},
         0,
@@ -77,6 +109,7 @@ func TestSelectLeft(t *testing.T) {
         },
     }
     title.selectLeft(&mockGui{}, nil)
+    */
 }
 
 func createMenuWidget(name string, x, y, w, h int, body string) *MenuWidget {

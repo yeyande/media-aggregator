@@ -6,6 +6,14 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
+type ConsoleInterface interface {
+    SetView(name string, x0, y0, x1, y1 int) (*gocui.View, error)
+    SetCurrentView(name string) (*gocui.View, error)
+    SetKeybinding(viewname string, key interface{}, mod gocui.Modifier,
+                    handler func(*gocui.Gui, *gocui.View) error) error
+    View(name string) (*gocui.View, error)
+}
+
 type Widget struct {
     name string
     x, y int
@@ -14,11 +22,11 @@ type Widget struct {
     initialized bool
 }
 
-func (w *Widget) Layout(g *gocui.Gui) error {
+func (w *Widget) Layout(g ConsoleInterface) error {
     return w.render(g)
 }
 
-func (w *Widget) render(g *gocui.Gui) error {
+func (w *Widget) render(g ConsoleInterface) error {
 	v, err := g.SetView(w.name, w.x, w.y, w.x+w.w, w.y+w.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
