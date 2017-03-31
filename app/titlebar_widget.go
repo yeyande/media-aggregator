@@ -23,8 +23,8 @@ func (w *titlebarWidget) Layout(g *gocui.Gui) error {
     }
     if !w.initialized {
         w.setBindings(g)
+        w.menuEntries[w.selectedEntry].highlight(g)
         g.SetCurrentView(w.name)
-        w.selectEntry(g)
         w.initialized = true
     }
 	return nil
@@ -44,10 +44,10 @@ func (w *titlebarWidget) selectRight(g *gocui.Gui, v *gocui.View) error {
     return w.changeMenuEntry(g, 1)
 }
 
-func (w *titlebarWidget) changeMenuEntry(g *gocui.Gui, dir int) error {
-    w.deselectEntry(g)
+func (w *titlebarWidget) changeMenuEntry(g ConsoleInterface, dir int) error {
+    w.menuEntries[w.selectedEntry].dehighlight(g)
     w.shiftSelectedEntry(dir)
-    w.selectEntry(g)
+    w.menuEntries[w.selectedEntry].highlight(g)
 	return nil
 }
 
@@ -61,21 +61,6 @@ func (w *titlebarWidget) shiftSelectedEntry(pos int) {
         default:
             w.selectedEntry += pos
         }
-    }
-}
-
-func (w *titlebarWidget) deselectEntry(g ConsoleInterface) {
-    w.setEntryAttrs(g, gocui.ColorBlack, gocui.ColorWhite)
-}
-
-func (w *titlebarWidget) selectEntry(g ConsoleInterface) {
-    w.setEntryAttrs(g, gocui.ColorWhite, gocui.ColorBlack | gocui.AttrBold)
-}
-
-func (w *titlebarWidget) setEntryAttrs(g ConsoleInterface, bg, fg gocui.Attribute) {
-    if view, err := g.View(w.menuEntries[w.selectedEntry].name); err == nil {
-        view.BgColor = bg
-        view.FgColor = fg
     }
 }
 

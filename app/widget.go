@@ -7,10 +7,14 @@ import (
 )
 
 type ConsoleInterface interface {
+    viewGetter
     SetView(name string, x0, y0, x1, y1 int) (*gocui.View, error)
     SetCurrentView(name string) (*gocui.View, error)
     SetKeybinding(viewname string, key interface{}, mod gocui.Modifier,
                     handler func(*gocui.Gui, *gocui.View) error) error
+}
+
+type viewGetter interface {
     View(name string) (*gocui.View, error)
 }
 

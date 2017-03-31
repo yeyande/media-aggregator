@@ -6,7 +6,6 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
-type MenuWidget struct { Widget }
 
 type PlaylistWidget struct { Widget }
 
@@ -21,10 +20,6 @@ func setBinding(g ConsoleInterface, view string, key interface{},
 	if err := g.SetKeybinding(view, key, mod, cb); err != nil {
 		log.Panicln(err)
 	}
-}
-
-func NewMenuWidget(name, body string) *MenuWidget {
-    return &MenuWidget{Widget{name, 0, 0, len(body)+1, 0, body, false}}
 }
 
 func NewPlaylistWidget(x, y, h int) *PlaylistWidget {
