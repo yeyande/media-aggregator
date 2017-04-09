@@ -18,10 +18,14 @@ type viewGetter interface {
     View(name string) (*gocui.View, error)
 }
 
-type Widget struct {
-    name string
+type Window struct {
     x, y int
     w, h int
+}
+
+type Widget struct {
+    Window
+    name string
     body string
     initialized bool
 }
